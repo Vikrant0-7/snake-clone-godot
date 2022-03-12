@@ -18,6 +18,7 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	handle_input()
 
+#handles input
 func handle_input() -> void:
 	if direction.length_squared() == 0:
 		if Input.is_action_pressed("left"):
@@ -49,16 +50,18 @@ func _update() -> void:
 	rotation = direction.angle()
 
 
+#moves the snake
 func move() -> void:
 	global_position = Vector2(
 		global_position.round().x + direction.x * Global.TILE_SIZE,
 		global_position.round().y + direction.y * Global.TILE_SIZE
 		)
 
-
+#moves and gives direction to tail segment
 func move_tail_segment() -> void:
 	for i in range(segments.size() - 1,0,-1):
 		segments[i].global_position = segments[i - 1].position
+		segments[i].direction = segments[i - 1].direction
 
 #snaps movement of snake to the grid
 func snap_to_grid() -> void:
@@ -75,12 +78,26 @@ func snap_to_grid() -> void:
 
 #adds a segment to grow the snake
 func grow() -> void:
-	var tail_segment : StaticBody2D = tail_segment_scene.instance()
-	tail_segment.global_position = segments[segments.size() - 1].global_position
+	var tail_segment : Tail = tail_segment_scene.instance() #instances tail
+	tail_segment.global_position = segments[segments.size() - 1].global_position #assigns poistion to is
+
+	#first two segments can never be collided with snake
+	#so moving them to unmonitored layer
+	#thus avoiding any wrong or bugged kills
+	#it happened alot
 	if length < 2:
 		tail_segment.layers = 0b1000
-	$NotMovable.call_deferred("add_child",tail_segment)
+
+	$NotMovable.call_deferred("add_child",tail_segment) #makes spawnned tail a child
+
+	#assigns neighbour if cell has at least 2 members
+	#as 1 member is just head and does not require neighbour
+	if segments.size() > 1:
+		(segments[segments.size() - 1] as Tail).neighbour = tail_segment
+
+	#add tail just spawned to segemnt array so that it can be moved
 	segments.append(tail_segment)
+
 	Global.emit_signal("last_tail_update")
 	tail_segment.is_last = true
 	length += 1
