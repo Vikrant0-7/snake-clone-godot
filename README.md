@@ -3,5 +3,6 @@ This is clone of classic snake game, made in godot. Following code monkey's [tut
 
 # Installation
  ## Requirement
-Godot 3.2+ (made with godot 3.4.x)
+Godot 3.2+ (made with godot 3.4.x) 
+
 After cloning this repository, run Godot 3 and click scan project. Select the folder containing project.godot file.
